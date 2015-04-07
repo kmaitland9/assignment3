@@ -6,8 +6,13 @@
  */
 package assignment3;
 
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Formatter;
 import java.util.Scanner;
 
 public class AddressBook {
@@ -19,7 +24,9 @@ public class AddressBook {
 	private static final int REMOVE_PERSON = 2;
 	private static final int SORT_FULL_NAME = 3;
 	private static final int VIEW_PERSONS = 4;
-	private static final int EXIT = 5;
+	private static final int SAVE_ADDRESS_BOOK = 5;
+	private static final int LOAD_ADDRESS_BOOK = 6;
+	private static final int EXIT = 7;
 
 	/*
 	 * creates an arraylist of people and a scanner called input
@@ -37,7 +44,7 @@ public class AddressBook {
 	/*
 	 * the method that runs the addressbook program
 	 */
-	public void runAddressBook() throws ValidationException {
+	public void runAddressBook() throws ValidationException, IOException {
 
 		int num;
 
@@ -59,13 +66,57 @@ public class AddressBook {
 			case VIEW_PERSONS:
 				viewPersons();
 				break;
+			case SAVE_ADDRESS_BOOK:
+				saveAddressBook();
+				break;
+			case LOAD_ADDRESS_BOOK:
+				loadAddressBook();
+				break;
 			case EXIT:
 				System.out.println("Program will exit");
 				break;
 
 			}
 
-		} while (num != 5);
+		} while (num != EXIT);
+
+	}
+
+	private void loadAddressBook() throws FileNotFoundException {
+
+		for (int i = 0; i < Person.size(); i++) {
+			Person.remove(i);
+		}
+
+		File file = new File("addressbook.txt");
+		String line = null;
+		Scanner inLine = null;
+		while ((line = inLine.nextLine()) != null) {
+			String[] arrayLine = line.split(",");
+			String tempName = arrayLine[0];
+			String tempPhone = arrayLine[1];
+			String tempEmail = arrayLine[2];
+			try {
+				Person.add(new Person(tempName, tempPhone, tempEmail));
+			} catch (ValidationException e) {
+				e.printStackTrace();
+			}
+		}
+	}
+
+	private void saveAddressBook() throws IOException {
+		File file = new File("addressbook.txt");
+		Formatter out = new Formatter(new FileWriter(
+				new File("addressbook.txt")));
+
+		for (int i = 0; i < Person.size(); i++) {
+			StringBuilder rawData = new StringBuilder(Person.get(i).getFullName()).append(",")
+					.append(Person.get(i).getPhoneNumber()).append(",")
+					.append(Person.get(i).getEmail());
+			String data = rawData.toString();
+			out.format("%s%n", data);
+		}
+		out.close();
 
 	}
 
@@ -146,7 +197,9 @@ public class AddressBook {
 
 		System.out.println(ADD_PERSON + " - add a person\n" + REMOVE_PERSON
 				+ " - remove a person\n" + SORT_FULL_NAME + " - Sort by name\n"
-				+ VIEW_PERSONS + " - View persons\n" + EXIT + " - Exit");
+				+ VIEW_PERSONS + " - View persons\n" + SAVE_ADDRESS_BOOK
+				+ " - Save the address book\n" + LOAD_ADDRESS_BOOK
+				+ " - Load the address book\n" + EXIT + " - Exit");
 
 	}
 
